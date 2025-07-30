@@ -1,0 +1,129 @@
+.chat-container {
+  background: white;
+  width: 400px;
+  max-height: 600px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  margin: auto;
+  margin-top: 50px;
+  font-family: Arial, sans-serif;
+}
+
+.chat-header {
+  font-weight: bold;
+  font-size: 22px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+#chat {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background: #f9f9f9;
+  height: 300px;
+}
+
+.chat-message {
+  background-color: #e1ffc7;
+  padding: 8px 12px;
+  margin: 5px 0;
+  border-radius: 6px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+#msgInput {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+button {
+  padding: 10px 15px;
+  font-size: 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+.message {
+  max-width: 60%;
+  padding: 10px 15px;
+  margin: 6px 0;
+  border-radius: 15px;
+  font-size: 14px;
+  word-wrap: break-word;
+}
+
+.sent {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+  text-align: right;
+  margin-left: auto;
+}
+
+.received {
+  background-color: #f1f0f0;
+  align-self: flex-start;
+  text-align: left;
+  margin-right: auto;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+.chat-container {
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: #f7f7f7;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.message {
+  max-width: 60%;
+  padding: 10px 15px;
+  margin: 6px 0;
+  border-radius: 15px;
+  font-size: 14px;
+  word-wrap: break-word;
+}
+
+.sent {
+  background-color: #dcf8c6;
+  align-self: flex-end;  /* Align to right */
+  text-align: right;
+}
+
+.received {
+  background-color: #f1f0f0;
+  align-self: flex-start;  /* Align to left */
+  text-align: left;
+}
