@@ -1,20 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
-import "./App.css"; // Optional if you have styles here
+import "./App.css";
 
-const socket = io("https://chat-eqpy.onrender.com"); // ✅ Your backend URL
+const socket = io("https://chat-eqpy.onrender.com"); // ✅ Your deployed backend
 
 function App() {
   const [username, setUsername] = useState("");
   const [room, setRoom] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const bottomRef = useRef(null); // ✅ For auto scroll
+  const bottomRef = useRef(null);
 
   useEffect(() => {
     const enteredUsername = prompt("Enter your name");
     const enteredRoom = prompt("Enter Room ID to join");
-
     setUsername(enteredUsername);
     setRoom(enteredRoom);
 
@@ -37,8 +36,8 @@ function App() {
     e.preventDefault();
     if (message.trim()) {
       const newMessage = { message, username, room };
-      socket.emit("sendMessage", newMessage);
-      setMessage(""); // ✅ Don't manually add to messages
+      socket.emit("sendMessage", newMessage); // ✅ No local push
+      setMessage("");
     }
   };
 
@@ -59,7 +58,7 @@ function App() {
             <div>{msg.message}</div>
           </div>
         ))}
-        <div ref={bottomRef} /> {/* 👈 Keeps chat scrolled to bottom */}
+        <div ref={bottomRef} />
       </div>
       <form onSubmit={sendMessage} style={styles.form}>
         <input
@@ -98,7 +97,6 @@ const styles = {
     padding: "10px",
     borderRadius: "10px",
     maxWidth: "70%",
-    wordBreak: "break-word",
   },
   user: {
     fontSize: "0.7rem",
@@ -123,9 +121,7 @@ const styles = {
     color: "#fff",
     border: "none",
     borderRadius: "4px",
-    cursor: "pointer",
   },
 };
 
 export default App;
-
