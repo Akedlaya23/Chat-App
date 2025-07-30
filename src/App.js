@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
-import "./App.css"; // Optional external styling if needed
+import "./App.css"; // Optional if you have styles here
 
-const socket = io("https://chat-eqpy.onrender.com"); // ✅ Use your deployed backend
+const socket = io("https://chat-eqpy.onrender.com"); // ✅ Your backend URL
 
 function App() {
   const [username, setUsername] = useState("");
   const [room, setRoom] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const bottomRef = useRef(null); // ✅ For auto scroll
 
   useEffect(() => {
     const enteredUsername = prompt("Enter your name");
@@ -28,20 +29,22 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const sendMessage = (e) => {
     e.preventDefault();
     if (message.trim()) {
       const newMessage = { message, username, room };
       socket.emit("sendMessage", newMessage);
-      setMessages((prev) => [...prev, newMessage]);
-      setMessage("");
+      setMessage(""); // ✅ Don't manually add to messages
     }
   };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.header}>Chat Room: {room} | User: {username}</h2>
-
+      <h2>Chat Room: {room} | User: {username}</h2>
       <div style={styles.chatBox}>
         {messages.map((msg, index) => (
           <div
@@ -49,15 +52,15 @@ function App() {
             style={{
               ...styles.message,
               alignSelf: msg.username === username ? "flex-end" : "flex-start",
-              backgroundColor: msg.username === username ? "#dcf8c6" : "#f0f0f0",
+              backgroundColor: msg.username === username ? "#dcf8c6" : "#f1f0f0",
             }}
           >
-            <div style={styles.user}>{msg.username}</div>
+            <small style={styles.user}>{msg.username}</small>
             <div>{msg.message}</div>
           </div>
         ))}
+        <div ref={bottomRef} /> {/* 👈 Keeps chat scrolled to bottom */}
       </div>
-
       <form onSubmit={sendMessage} style={styles.form}>
         <input
           type="text"
@@ -68,10 +71,6 @@ function App() {
         />
         <button type="submit" style={styles.button}>Send</button>
       </form>
-
-      <footer style={styles.footer}>
-        Created by Abhiram with AI
-      </footer>
     </div>
   );
 }
@@ -80,26 +79,18 @@ const styles = {
   container: {
     maxWidth: "600px",
     margin: "40px auto",
-    fontFamily: "Segoe UI, sans-serif",
+    fontFamily: "Arial, sans-serif",
     textAlign: "center",
-    backgroundColor: "#f9f9f9",
-    padding: "20px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-  },
-  header: {
-    marginBottom: "20px",
-    color: "#333",
   },
   chatBox: {
-    border: "1px solid #ddd",
-    padding: "15px",
+    border: "1px solid #ccc",
+    padding: "20px",
     height: "400px",
     overflowY: "auto",
     display: "flex",
     flexDirection: "column",
-    borderRadius: "8px",
     backgroundColor: "#fff",
+    borderRadius: "10px",
     marginBottom: "15px",
   },
   message: {
@@ -107,24 +98,23 @@ const styles = {
     padding: "10px",
     borderRadius: "10px",
     maxWidth: "70%",
-    textAlign: "left",
+    wordBreak: "break-word",
   },
   user: {
-    fontSize: "0.75rem",
-    color: "#777",
-    marginBottom: "4px",
+    fontSize: "0.7rem",
+    color: "#555",
+    marginBottom: "2px",
+    display: "block",
   },
   form: {
     display: "flex",
-    gap: "10px",
     justifyContent: "center",
+    gap: "10px",
   },
   input: {
     padding: "10px",
     width: "70%",
     fontSize: "16px",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
   },
   button: {
     padding: "10px 20px",
@@ -132,13 +122,8 @@ const styles = {
     backgroundColor: "#2196F3",
     color: "#fff",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "4px",
     cursor: "pointer",
-  },
-  footer: {
-    marginTop: "20px",
-    fontSize: "0.8rem",
-    color: "#999",
   },
 };
 
