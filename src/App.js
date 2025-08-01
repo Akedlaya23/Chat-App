@@ -2,31 +2,28 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import "./App.css";
 
-const socket = io("https://chat-eqpy.onrender.com"); // ✅ Your deployed backend
+const socket = io("https://chat-eqpy.onrender.com");
 
 function App() {
   const [username, setUsername] = useState("");
   const [room, setRoom] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [joined, setJoined] = useState(false);
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    const enteredUsername = prompt("Enter your name");
-    const enteredRoom = prompt("Enter Room ID to join");
-    setUsername(enteredUsername);
-    setRoom(enteredRoom);
+    if (joined) {
+      socket.emit("joinRoom", room);
+      socket.on("receiveMessage", (data) => {
+        setMessages((prev) => [...prev, data]);
+      });
 
-    socket.emit("joinRoom", enteredRoom);
-
-    socket.on("receiveMessage", (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
-
-    return () => {
-      socket.off("receiveMessage");
-    };
-  }, []);
+      return () => {
+        socket.off("receiveMessage");
+      };
+    }
+  }, [joined, room]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -36,14 +33,48 @@ function App() {
     e.preventDefault();
     if (message.trim()) {
       const newMessage = { message, username, room };
-      socket.emit("sendMessage", newMessage); // ✅ No local push
+      socket.emit("sendMessage", newMessage);
       setMessage("");
     }
   };
 
+  const handleJoin = (e) => {
+    e.preventDefault();
+    if (username && room) {
+      setJoined(true);
+    }
+  };
+
+  if (!joined) {
+    return (
+      <div style={styles.joinContainer}>
+        <form onSubmit={handleJoin} style={styles.formBox}>
+          <h2 style={{ marginBottom: 20 }}>Join Chat Room</h2>
+          <input
+            type="text"
+            placeholder="Enter your name"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            style={styles.input}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Enter Room ID"
+            value={room}
+            onChange={(e) => setRoom(e.target.value)}
+            style={styles.input}
+            required
+          />
+          <button type="submit" style={styles.button}>Join</button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div style={styles.container}>
-      <h2>Chat Room: {room} | User: {username}</h2>
+      <h2>Room: {room} | User: {username}</h2>
       <div style={styles.chatBox}>
         {messages.map((msg, index) => (
           <div
@@ -70,6 +101,9 @@ function App() {
         />
         <button type="submit" style={styles.button}>Send</button>
       </form>
+      <p style={{ marginTop: 20, fontSize: "0.9rem", color: "#999" }}>
+        Created by Abhiram with AI 🤖
+      </p>
     </div>
   );
 }
@@ -80,6 +114,23 @@ const styles = {
     margin: "40px auto",
     fontFamily: "Arial, sans-serif",
     textAlign: "center",
+  },
+  joinContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    backgroundColor: "#f0f4f8",
+  },
+  formBox: {
+    backgroundColor: "#fff",
+    padding: "30px",
+    borderRadius: "10px",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+    width: "300px",
   },
   chatBox: {
     border: "1px solid #ccc",
@@ -97,6 +148,7 @@ const styles = {
     padding: "10px",
     borderRadius: "10px",
     maxWidth: "70%",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
   },
   user: {
     fontSize: "0.7rem",
@@ -113,6 +165,8 @@ const styles = {
     padding: "10px",
     width: "70%",
     fontSize: "16px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
   },
   button: {
     padding: "10px 20px",
@@ -120,8 +174,10 @@ const styles = {
     backgroundColor: "#2196F3",
     color: "#fff",
     border: "none",
-    borderRadius: "4px",
+    borderRadius: "6px",
+    cursor: "pointer",
   },
 };
 
 export default App;
+
