@@ -18,7 +18,6 @@ function App() {
       socket.on("receiveMessage", (data) => {
         setMessages((prev) => [...prev, data]);
       });
-
       return () => {
         socket.off("receiveMessage");
       };
@@ -32,24 +31,21 @@ function App() {
   const sendMessage = (e) => {
     e.preventDefault();
     if (message.trim()) {
-      const newMessage = { message, username, room };
-      socket.emit("sendMessage", newMessage);
+      socket.emit("sendMessage", { message, username, room });
       setMessage("");
     }
   };
 
   const handleJoin = (e) => {
     e.preventDefault();
-    if (username && room) {
-      setJoined(true);
-    }
+    if (username && room) setJoined(true);
   };
 
   if (!joined) {
     return (
       <div style={styles.joinContainer}>
-        <form onSubmit={handleJoin} style={styles.formBox}>
-          <h2 style={{ marginBottom: 20 }}>Join Chat Room</h2>
+        <form onSubmit={handleJoin} style={styles.joinBox}>
+          <h2 style={{ marginBottom: 20 }}>💬 Join Chat Room</h2>
           <input
             type="text"
             placeholder="Enter your name"
@@ -67,117 +63,154 @@ function App() {
             required
           />
           <button type="submit" style={styles.button}>Join</button>
+          <p style={styles.footer}>Created by Abhiram with AI 🤖</p>
         </form>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <h2>Room: {room} | User: {username}</h2>
+    <div style={styles.chatContainer}>
+      <header style={styles.header}>
+        <h2>Room: {room} | User: {username}</h2>
+      </header>
+
       <div style={styles.chatBox}>
-        {messages.map((msg, index) => (
+        {messages.map((msg, idx) => (
           <div
-            key={index}
+            key={idx}
             style={{
               ...styles.message,
               alignSelf: msg.username === username ? "flex-end" : "flex-start",
-              backgroundColor: msg.username === username ? "#dcf8c6" : "#f1f0f0",
+              backgroundColor: msg.username === username ? "#d1ffe3" : "#f0f0f0",
             }}
           >
-            <small style={styles.user}>{msg.username}</small>
+            <div style={styles.messageUser}>{msg.username}</div>
             <div>{msg.message}</div>
           </div>
         ))}
         <div ref={bottomRef} />
       </div>
-      <form onSubmit={sendMessage} style={styles.form}>
+
+      <form onSubmit={sendMessage} style={styles.inputArea}>
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
-          style={styles.input}
+          style={styles.textInput}
         />
-        <button type="submit" style={styles.button}>Send</button>
+        <button type="submit" style={styles.sendButton}>Send</button>
       </form>
-      <p style={{ marginTop: 20, fontSize: "0.9rem", color: "#999" }}>
-        Created by Abhiram with AI 🤖
-      </p>
+
+      <footer style={styles.footer}>Created by Abhiram with AI 🤖</footer>
     </div>
   );
 }
 
 const styles = {
-  container: {
-    maxWidth: "600px",
-    margin: "40px auto",
-    fontFamily: "Arial, sans-serif",
-    textAlign: "center",
+  chatContainer: {
+    maxWidth: 700,
+    margin: "0 auto",
+    fontFamily: "'Segoe UI', sans-serif",
+    backgroundColor: "#f9f9f9",
+    borderRadius: "10px",
+    padding: "20px",
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
   },
   joinContainer: {
+    height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: "100vh",
-    backgroundColor: "#f0f4f8",
+    background: "linear-gradient(120deg, #a1c4fd, #c2e9fb)",
   },
-  formBox: {
+  joinBox: {
     backgroundColor: "#fff",
-    padding: "30px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    width: "300px",
-  },
-  chatBox: {
-    border: "1px solid #ccc",
-    padding: "20px",
-    height: "400px",
-    overflowY: "auto",
-    display: "flex",
-    flexDirection: "column",
-    backgroundColor: "#fff",
-    borderRadius: "10px",
-    marginBottom: "15px",
-  },
-  message: {
-    margin: "5px",
-    padding: "10px",
-    borderRadius: "10px",
-    maxWidth: "70%",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-  },
-  user: {
-    fontSize: "0.7rem",
-    color: "#555",
-    marginBottom: "2px",
-    display: "block",
-  },
-  form: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "10px",
+    padding: "40px",
+    borderRadius: "12px",
+    boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+    textAlign: "center",
+    width: "90%",
+    maxWidth: "350px",
   },
   input: {
-    padding: "10px",
-    width: "70%",
-    fontSize: "16px",
-    borderRadius: "6px",
+    padding: "12px",
+    marginBottom: "15px",
+    width: "100%",
+    borderRadius: "8px",
     border: "1px solid #ccc",
+    fontSize: "16px",
   },
   button: {
-    padding: "10px 20px",
+    padding: "12px",
+    width: "100%",
     fontSize: "16px",
     backgroundColor: "#2196F3",
     color: "#fff",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
+    fontWeight: "bold",
+  },
+  header: {
+    textAlign: "center",
+    marginBottom: "10px",
+  },
+  chatBox: {
+    backgroundColor: "#fff",
+    borderRadius: "10px",
+    padding: "15px",
+    height: "400px",
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    boxShadow: "inset 0 1px 5px rgba(0,0,0,0.05)",
+  },
+  message: {
+    padding: "10px 14px",
+    margin: "6px 0",
+    borderRadius: "8px",
+    maxWidth: "70%",
+    boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
+  },
+  messageUser: {
+    fontSize: "0.75rem",
+    fontWeight: "bold",
+    color: "#555",
+    marginBottom: "4px",
+  },
+  inputArea: {
+    display: "flex",
+    marginTop: "10px",
+    gap: "10px",
+  },
+  textInput: {
+    flex: 1,
+    padding: "12px",
+    fontSize: "16px",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+  },
+  sendButton: {
+    padding: "12px 20px",
+    fontSize: "16px",
+    backgroundColor: "#4CAF50",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+  footer: {
+    marginTop: "15px",
+    textAlign: "center",
+    fontSize: "0.85rem",
+    color: "#888",
   },
 };
 
 export default App;
-
