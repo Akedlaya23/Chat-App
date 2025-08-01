@@ -13,7 +13,7 @@
   <!-- Socket.IO client -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
-    const socket = io("http://localhost:5000"); // Change port if needed
+    const socket = io("https://chat-eqpy.onrender.com/"); // Change port if needed
 
     socket.on("chat message", (msg) => {
       const item = document.createElement("li");
