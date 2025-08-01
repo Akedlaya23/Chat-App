@@ -11,7 +11,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [joined, setJoined] = useState(false);
   const bottomRef = useRef(null);
-  useeffect(() =>{
+  useEffect(() =>{
     document.title="Chat App";
   },[]);
 
