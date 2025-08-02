@@ -163,7 +163,7 @@ const styles = {
   },
     @media(min-width: 768px){
   input: {
-    width:405,
+    width:40%,
       },
   },
   chatInput: {
