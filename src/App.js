@@ -157,7 +157,7 @@ const styles = {
     borderRadius: 100,
     border: '1px solid #bbb',
     width: '80%',
-    maxwidth:'500px',
+    maxwidth:'200px',
     boxSizing: 'border-box',
     outline: 'none',
     transition: '0.3s',
