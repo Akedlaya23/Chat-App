@@ -109,6 +109,9 @@ function App() {
               placeholder="Type message..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key == 'Enter')sendMessage();
+              }}
               style={styles.chatInput}
             />
             <button onClick={handleSend} style={styles.button}>Send</button>
