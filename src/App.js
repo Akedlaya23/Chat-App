@@ -157,15 +157,12 @@ const styles = {
     borderRadius: 100,
     border: '1px solid #bbb',
     width: '80%',
+    maxwidth:'500px',
     boxSizing: 'border-box',
     outline: 'none',
     transition: '0.3s',
   },
-    @media(min-width: 768px){
-  input: {
-    width:40%,
-      },
-  },
+    
   chatInput: {
     padding: '12px 14px',
     fontSize: '15px',
