@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import axios from 'axios';
 
-const socket = io('http://localhost:5007');
+const socket = io('https://chat7-l7uc.onrender.com');
 
 function App() {
   const [room, setRoom] = useState('');
@@ -42,7 +42,7 @@ function App() {
     if (!room || !password || !username) return setError('Fill all fields');
     try {
       // Check if room exists before joining
-      const res = await axios.post('http://localhost:5007/check-room', { room, password });
+      const res = await axios.post('https://chat7-l7uc.onrender.com/check-room', { room, password });
       if (res.data.success) {
         socket.emit('joinRoom', { room, password });
         setJoined(true);
@@ -63,7 +63,7 @@ function App() {
 
   const handleRegister = async () => {
     try {
-      await axios.post('http://localhost:5007/register', { room, password });
+      await axios.post('https://chat7-l7uc.onrender.com/register', { room, password });
       alert('Room registered!');
     } catch (err) {
       alert(err.response?.data?.message || 'Error registering room');
