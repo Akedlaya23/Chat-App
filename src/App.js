@@ -1,218 +1,234 @@
-import React, { useEffect, useRef, useState } from "react";
-import io from "socket.io-client";
+import React, { useEffect, useRef, useState } from 'react';
+import io from 'socket.io-client';
+import axios from 'axios';
 
-
-const socket = io("https://chat-eqpy.onrender.com");
+const socket = io('http://localhost:5007');
 
 function App() {
-  const [username, setUsername] = useState("");
-  const [room, setRoom] = useState("");
-  const [message, setMessage] = useState("");
+  const [room, setRoom] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [joined, setJoined] = useState(false);
+  const [error, setError] = useState('');
   const bottomRef = useRef(null);
-  useEffect(() =>{
-    document.title="Chat App";
-  },[]);
 
   useEffect(() => {
-    if (joined) {
-      socket.emit("joinRoom", room);
-      socket.on("receiveMessage", (data) => {
-        setMessages((prev) => [...prev, data]);
-      });
-      return () => {
-        socket.off("receiveMessage");
-      };
-    }
-  }, [joined, room]);
+    socket.on('receiveMessage', (newMsg) => {
+      setMessages((prev) => [...prev, newMsg]);
+    });
+
+    socket.on('previousMessages', (msgs) => {
+      setMessages(msgs);
+    });
+
+    socket.on('errorMessage', (msg) => {
+      setError(msg);
+    });
+
+    return () => {
+      socket.off('receiveMessage');
+      socket.off('previousMessages');
+      socket.off('errorMessage');
+    };
+  }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = (e) => {
-    e.preventDefault();
-    if (message.trim()) {
-      socket.emit("sendMessage", { message, username, room });
-      setMessage("");
+  const handleJoin = async () => {
+    if (!room || !password || !username) return setError('Fill all fields');
+    try {
+      // Check if room exists before joining
+      const res = await axios.post('http://localhost:5007/check-room', { room, password });
+      if (res.data.success) {
+        socket.emit('joinRoom', { room, password });
+        setJoined(true);
+        setError('');
+      } else {
+        setError('Invalid room or password');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid room or password');
     }
   };
 
-  const handleJoin = (e) => {
-    e.preventDefault();
-    if (username && room) setJoined(true);
+  const handleSend = () => {
+    if (!message.trim()) return;
+    socket.emit('sendMessage', { room, username, message });
+    setMessage('');
   };
 
-  if (!joined) {
-    return (
-      <div style={styles.joinContainer}>
-        <form onSubmit={handleJoin} style={styles.joinBox}>
-          <h2 style={{ marginBottom: 20 }}>💬 Join Chat Room</h2>
-          <input
-            type="text"
-            placeholder="Enter your name"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={styles.input}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Enter Room ID"
-            value={room}
-            onChange={(e) => setRoom(e.target.value)}
-            style={styles.input}
-            required
-          />
-          <button type="submit" style={styles.button}>Join</button>
-          <p style={styles.footer}>Created by Abhiram with AI 🤖</p>
-        </form>
-      </div>
-    );
-  }
+  const handleRegister = async () => {
+    try {
+      await axios.post('http://localhost:5007/register', { room, password });
+      alert('Room registered!');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error registering room');
+    }
+  };
 
   return (
-    <div style={styles.chatContainer}>
-      <header style={styles.header}>
-        <h2>Room: {room} | User: {username}</h2>
-      </header>
+    <div style={styles.container}>
+      <h1 style={styles.title}>🔐 Chat Rooms</h1>
 
-      <div style={styles.chatBox}>
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            style={{
-              ...styles.message,
-              alignSelf: msg.username === username ? "flex-end" : "flex-start",
-              backgroundColor: msg.username === username ? "#d1ffe3" : "#f0f0f0",
-            }}
-          >
-            <div style={styles.messageUser}>{msg.username}</div>
-            <div>{msg.message}</div>
+      {!joined ? (
+        <div style={styles.form}>
+          <input placeholder="Room" value={room} onChange={(e) => setRoom(e.target.value)} style={styles.input} />
+          <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
+          <input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} style={styles.input} />
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={handleJoin} style={styles.button}>Join Room</button>
+            <button onClick={handleRegister} style={styles.secondaryButton}>Register Room</button>
           </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
+          {error && <p style={styles.error}>{error}</p>}
+        </div>
+      ) : (
+        <>
+          <div style={styles.chatBox}>
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                style={{
+                  ...styles.messageBubble,
+                  alignSelf: msg.username === username ? 'flex-end' : 'flex-start',
+                  backgroundColor: msg.username === username ? '#4f46e5' : '#f0f0f0',
+                  color: msg.username === username ? 'white' : 'black',
+                }}
+              >
+                <strong>{msg.username}</strong>
+                <div>{msg.message}</div>
+              </div>
+            ))}
+            <div ref={bottomRef} />
+          </div>
+          <div style={styles.messageInputContainer}>
+            <input
+              placeholder="Type message..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              style={styles.chatInput}
+            />
+            <button onClick={handleSend} style={styles.button}>Send</button>
+          </div>
+        </>
+      )}
 
-      <form onSubmit={sendMessage} style={styles.inputArea}>
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message..."
-          style={styles.textInput}
-        />
-        <button type="submit" style={styles.sendButton}>Send</button>
-      </form>
-
-      <footer style={styles.footer}>Created by Abhiram with AI 🤖</footer>
+      <footer style={styles.footer}>
+        Created by <strong>Abhiram</strong> using AI 🤖
+      </footer>
     </div>
   );
 }
 
 const styles = {
-  chatContainer: {
-    maxWidth: 700,
-    margin: "0 auto",
-    fontFamily: "'Segoe UI', sans-serif",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "10px",
-    padding: "20px",
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
+  container: {
+    fontFamily: "'Poppins', sans-serif",
+    maxWidth: 1500,
+    margin: '0 auto',
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+    background: 'linear-gradient(to right, #e0eafc, #cfdef3)',
   },
-  joinContainer: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "linear-gradient(120deg, #a1c4fd, #c2e9fb)",
+  title: {
+    textAlign: 'center',
+    marginBottom: 90,
+    fontSize: '2.2rem',
+    color: '#333',
+    fontWeight: 600,
   },
-  joinBox: {
-    backgroundColor: "#fff",
-    padding: "40px",
-    borderRadius: "12px",
-    boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
-    textAlign: "center",
-    width: "90%",
-    maxWidth: "350px",
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+    alignItems: 'center',
   },
   input: {
-    padding: "12px",
-    marginBottom: "15px",
-    width: "100%",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "16px",
+    padding: '12px 14px',
+    fontSize: '15px',
+    borderRadius: 100,
+    border: '1px solid #bbb',
+    width: '30%',
+    boxSizing: 'border-box',
+    outline: 'none',
+    transition: '0.3s',
+  },
+  chatInput: {
+    padding: '12px 14px',
+    fontSize: '15px',
+    borderRadius: 100,
+    border: '1px solid #bbb',
+    width: '100%',
+    boxSizing: 'border-box',
+    outline: 'none',
+    transition: '0.3s',
   },
   button: {
-    padding: "12px",
-    width: "100%",
-    fontSize: "16px",
-    backgroundColor: "#2196F3",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "bold",
+    padding: '10px 16px',
+    fontSize: '15px',
+    background: 'linear-gradient(to right, #667eea, #764ba2)',
+    color: 'white',
+    border: 'none',
+    borderRadius: 100,
+    cursor: 'pointer',
+    fontWeight: 500,
   },
-  header: {
-    textAlign: "center",
-    marginBottom: "10px",
+  secondaryButton: {
+    padding: '10px 16px',
+    fontSize: '15px',
+    backgroundColor: '#6c757d',
+    color: 'white',
+    border: 'none',
+    borderRadius: 100,
+    cursor: 'pointer',
+    fontWeight: 500,
+  },
+  error: {
+    color: 'red',
+    fontWeight: 500,
   },
   chatBox: {
-    backgroundColor: "#fff",
-    borderRadius: "10px",
-    padding: "15px",
-    height: "400px",
-    overflowY: "auto",
-    display: "flex",
-    flexDirection: "column",
-    boxShadow: "inset 0 1px 5px rgba(0,0,0,0.05)",
+    width: '70%',
+    margin: '0 auto',
+    flexGrow: 2,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+    maxHeight: 400,
+    overflowY: 'auto',
+    padding: 20,
+    border: '1px solid #ccc',
+    borderRadius: 10,
+    marginBottom: 10,
+    backgroundColor: '#ffffff',
   },
-  message: {
-    padding: "10px 14px",
-    margin: "6px 0",
-    borderRadius: "8px",
-    maxWidth: "70%",
-    boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
+  messageBubble: {
+    padding: 8,
+    borderRadius: 10,
+    maxWidth: '70%',
+    wordWrap: 'break-word',
+    borderRadius1:15,
+    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+    backgroundColor: '#f1f1f1',
   },
-  messageUser: {
-    fontSize: "0.75rem",
-    fontWeight: "bold",
-    color: "#555",
-    marginBottom: "4px",
-  },
-  inputArea: {
-    display: "flex",
-    marginTop: "10px",
-    gap: "10px",
-  },
-  textInput: {
-    flex: 1,
-    padding: "12px",
-    fontSize: "16px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-  },
-  sendButton: {
-    padding: "12px 20px",
-    fontSize: "16px",
-    backgroundColor: "#4CAF50",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "bold",
+  messageInputContainer: {
+    display: 'flex',
+    gap: 10,
+    width: '50%',
+    margin: '0 auto 20px',
   },
   footer: {
-    marginTop: "15px",
-    textAlign: "center",
-    fontSize: "0.85rem",
-    color: "#888",
+    marginTop: 'auto',
+    paddingTop: 24,
+    textAlign: 'center',
+    fontSize: '0.9rem',
+    color: '#444',
+    fontWeight: 500,
+    textShadow: '0 0 1px #ccc',
   },
 };
 
