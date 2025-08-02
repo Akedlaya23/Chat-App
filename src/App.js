@@ -161,6 +161,11 @@ const styles = {
     outline: 'none',
     transition: '0.3s',
   },
+    @media(min-width: 768px){
+  input: {
+    width:405,
+      },
+  },
   chatInput: {
     padding: '12px 14px',
     fontSize: '15px',
