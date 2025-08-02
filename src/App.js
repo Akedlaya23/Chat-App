@@ -168,7 +168,7 @@ const styles = {
     fontSize: '15px',
     borderRadius: 100,
     border: '1px solid #bbb',
-    width: '100%',
+    width: '150%',
     boxSizing: 'border-box',
     outline: 'none',
     transition: '0.3s',
