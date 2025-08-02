@@ -110,7 +110,7 @@ function App() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key == 'Enter')handleSend();
+                if (e.key === 'Enter') handleSend();
               }}
               style={styles.chatInput}
             />
