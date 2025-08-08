@@ -39,6 +39,8 @@
 
 📸 Screenshots
      
+<img width="1365" height="717" alt="Screenshot 2025-08-08 204715" src="https://github.com/user-attachments/assets/ede601c1-31dc-45e5-9be3-568497decd72" />
+
 
 
 
