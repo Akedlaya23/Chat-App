@@ -25,11 +25,12 @@
         
 
 🛠 Tech Stack
-     Frontend:
+    
+    Frontend:
      React
      Socket.IO Client
 
-     Backend
+    Backend:
      Node.js
      Express
      MongoDB (Mongoose)
@@ -38,6 +39,7 @@
 
 📸 Screenshots
      
+
 
 
 
