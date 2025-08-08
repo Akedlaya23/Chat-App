@@ -10,7 +10,7 @@
 ✨ Features
 
     🔑 Password-protected rooms – Create or
-       join rooms securely
+        join rooms securely
     ⚡ Real-time messaging – Instant updates
         via Socket.IO
      🗂 MongoDB storage – Messages saved in 
